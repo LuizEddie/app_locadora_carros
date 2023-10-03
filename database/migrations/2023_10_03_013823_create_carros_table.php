@@ -16,6 +16,12 @@ class CreateCarrosTable extends Migration
         Schema::create('carros', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->unsignedBigInteger('modelo_id');
+            $table->string("placa", 10)->unique();
+            $table->boolean('disponivel');
+            $table->integer('km');
+            
+            $table->foreign('modelo_id')->references('id')->on('modelos');
         });
     }
 

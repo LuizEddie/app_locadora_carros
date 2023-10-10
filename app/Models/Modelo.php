@@ -29,4 +29,8 @@ class Modelo extends Model
             'imagem.mimes'=> 'O arquivo deve ser uma imagem do tipo png, jpg, jpeg ou gif'
         ];
     }
+
+    public function marca(){
+        return $this->belongsTo('App\Models\Marca');
+    }
 }

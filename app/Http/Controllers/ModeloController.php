@@ -22,9 +22,28 @@ class ModeloController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json($this->modelo->all(), 200);
+
+        $modelos = array();
+
+        if($request->has('atributos_marca')){
+            $atributos_marca = $request->atributos_marca;
+            $modelos = $this->modelo->with('marca:id,'.$atributos_marca);
+        }else{
+            $modelos = $this->modelo->with('marca');
+
+        }
+
+        if($request->has('atributos')){
+            $atributos = $request->atributos;
+            $modelos = $modelos->selectRaw($atributos)->get();
+        }else{
+            $modelos = $modelos->get();
+        }
+        return response()->json($modelos, 200);
+        //all() -> criando um obj de consulta + get() = collection;
+        //get() -> modificar a consulta -> collection;
     }
 
     /**
@@ -71,7 +90,7 @@ class ModeloController extends Controller
      */
     public function show($id)
     {
-        $modelo = $this->modelo->find($id);
+        $modelo = $this->modelo->with('marca')->find($id);
         
         if($modelo === null){
             return response()->json(['erro'=>'Recurso pesquisado não existe'], 404);
@@ -129,15 +148,10 @@ class ModeloController extends Controller
         $imagem = $request->file('imagem');
         $urn = $imagem->store('imagens/modelos', 'public');
 
-        $modelo->update([
-            "marca_id"=>$request->marca_id,
-            'nome'=>$request->nome,
-            'imagem'=>$urn,
-            'numero_portas'=>$request->numero_portas,
-            'lugares'=>$request->lugares,
-            'air_bag'=>$request->air_bag,
-            'abs'=>$request->abs
-        ]);
+        $modelo->fill($request->all());
+        $modelo->imagem = $urn;
+
+        $modelo->save();
 
         return response()->json($modelo, 200);
     }

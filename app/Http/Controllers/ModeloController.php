@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Modelo;
+use App\Repositories\ModeloRepository;
 use Illuminate\Contracts\Cache\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -24,33 +25,25 @@ class ModeloController extends Controller
      */
     public function index(Request $request)
     {
-
-        $modelos = array();
+        $modeloRepository = new ModeloRepository($this->modelo);
 
         if($request->has('atributos_marca')){
-            $atributos_marca = $request->atributos_marca;
-            $modelos = $this->modelo->with('marca:id,'.$atributos_marca);
+            $atributos_marca = 'marca:id,'.$request->atributos_marca;
+            $modeloRepository->selectAtributosRegistrosRelacionados($atributos_marca);
         }else{
-            $modelos = $this->modelo->with('marca');
+            $modeloRepository->selectAtributosRegistrosRelacionados('marca');
         }
 
-        if($request->has('filtro')){
-
-            $filtros = explode(";", $request->filtro);
-            for($c = 0; $c < count($filtros); $c++){
-                $condicoes = explode(':', $filtros[$c]);
-                $modelos = $modelos->where($condicoes[0], $condicoes[1], $condicoes[2]);
-            }
-       
+        if($request->has("filtro")){
+            $modeloRepository->filtro($request->filtro);
         }
 
         if($request->has('atributos')){
-            $atributos = $request->atributos;
-            $modelos = $modelos->selectRaw($atributos)->get();
-        }else{
-            $modelos = $modelos->get();
+            $modeloRepository->selectAtributos($request->atributos);
         }
-        return response()->json($modelos, 200);
+
+        return response()->json($modeloRepository->getResultado(), 200);
+
         //all() -> criando um obj de consulta + get() = collection;
         //get() -> modificar a consulta -> collection;
     }

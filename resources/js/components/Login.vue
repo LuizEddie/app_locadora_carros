@@ -5,7 +5,7 @@
         <div class="card">
           <div class="card-header">Login</div>
           <div class="card-body">
-            <form method="POST" action="">
+            <form method="POST" action="" @submit.prevent="login($event)">
               <input type="hidden" name="_token" :value="csrf_token" />
               <div class="form-group row">
                 <label for="email" class="col-md-4 col-form-label text-md-right"
@@ -22,6 +22,7 @@
                     required
                     autocomplete="email"
                     autofocus
+                    v-model="email"
                   />
                 </div>
               </div>
@@ -41,6 +42,7 @@
                     name="password"
                     required
                     autocomplete="current-password"
+                    v-model="password"
                   />
                 </div>
               </div>
@@ -80,5 +82,35 @@
 <script>
 export default {
   props: ["csrf_token"],
+  data() {
+    return {
+      email: "",
+      password: "",
+    };
+  },
+  methods: {
+    login(e) {
+      let url = "http://localhost:8000/api/login";
+      let config = {
+        method: "POST",
+        body: new URLSearchParams({
+          email: this.email,
+          password: this.password,
+        }),
+      };
+      fetch(url, config)
+        .then((dados) => {
+          return dados.json();
+        })
+        .then((dados2) => {
+          if (dados2.token) {
+            document.cookie = "token=" + dados2.token + ";SameSite=Lax";
+          }
+          
+          e.target.submit();
+        });
+
+    },
+  },
 };
 </script>

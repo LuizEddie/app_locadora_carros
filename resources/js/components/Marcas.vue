@@ -2,46 +2,69 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-8">
-        <div class="card">
-          <div class="card-header">Busca de Marcas</div>
-
-          <div class="card-body">
+        <!-- Inicio do card de busca -->
+        <card-component titulo="Busca de Marcas">
+          <template v-slot:conteudo>
             <div class="form-row">
               <div class="col mb-3">
-                <label for="inputId" class="form-label">ID</label>
-                <input
-                  type="number"
-                  class="form-control"
+                <input-container-component
+                  titulo="ID"
                   id="inputId"
-                  aria-describedby="idHelp"
-                  placeholder="ID"
-                />
-                <div id="idHelp" class="form-text text-muted">
-                  Opcional. Informe o ID do registro
-                </div>
+                  id-help="idHelp"
+                  texto-ajuda="Opcional. Informe o ID da marca"
+                >
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="inputId"
+                    aria-describedby="idHelp"
+                    placeholder="ID"
+                  />
+                </input-container-component>
               </div>
               <div class="col mb-3">
-                <label for="inputNome" class="form-label">Nome</label>
-                <input
-                  type="number"
-                  class="form-control"
+                <input-container-component
+                  titulo="Nome da Marca"
                   id="inputNome"
-                  aria-describedby="nomeHelp"
-                  placeholder="Nome da marca"
-                />
-                <div id="nomeHelp" class="form-text text-muted">
-                  Opcional. Informe o nome da marca
-                </div>
+                  id-help="nomeHelp"
+                  texto-ajuda="Opcional. Informe o nome da marca"
+                >
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="inputNome"
+                    aria-describedby="nomeHelp"
+                    placeholder="Informe o nome da marca"
+                  />
+                </input-container-component>
               </div>
             </div>
-          </div>
-          <div class="card-footer">
+          </template>
+          <template v-slot:rodape>
             <button type="submit" class="btn btn-primary btn-sm float-right">
               Pesquisar
             </button>
-          </div>
-        </div>
+          </template>
+        </card-component>
+        <!--Fim-->
+        <!-- Inicio do card de listagem -->
+
+        <card-component titulo="Relação de marcas">
+          <template v-slot:conteudo>
+            <table-component></table-component>
+          </template>
+          <template v-slot:rodape>
+            <button type="button" class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#modalMarca">
+              Adicionar
+            </button>
+          </template>
+        </card-component>
+        <!--Fim-->
       </div>
     </div>
+
+    <!--Modal-->
+    <modal-component id="modalMarca" titulo="Adicionar Marca"></modal-component>
+    <!--Fim-->
   </div>
 </template>

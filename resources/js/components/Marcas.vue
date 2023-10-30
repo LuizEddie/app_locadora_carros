@@ -54,7 +54,12 @@
             <table-component></table-component>
           </template>
           <template v-slot:rodape>
-            <button type="button" class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#modalMarca">
+            <button
+              type="button"
+              class="btn btn-primary btn-sm float-right"
+              data-toggle="modal"
+              data-target="#modalMarca"
+            >
               Adicionar
             </button>
           </template>
@@ -64,7 +69,104 @@
     </div>
 
     <!--Modal-->
-    <modal-component id="modalMarca" titulo="Adicionar Marca"></modal-component>
+    <modal-component id="modalMarca" titulo="Adicionar Marca">
+      <template v-slot:conteudo>
+        <div class="form-group">
+          <input-container-component
+            titulo="Nome da Marca"
+            id="novoNome"
+            id-help="novoNomeHelp"
+            texto-ajuda="Digite o nome da marca"
+          >
+            <input
+              type="text"
+              class="form-control"
+              id="novoNome"
+              aria-describedby="novoNomeHelp"
+              placeholder="Nome da Marca"
+              required
+              v-model="nomeMarca"
+            />
+          </input-container-component>
+        </div>
+        <div class="form-group">
+          <input-container-component
+            titulo="Imagem"
+            id="novoImagem"
+            id-help="novoImagemHelp"
+            texto-ajuda="Faça o upload do logo da marca"
+          >
+            <input
+              type="file"
+              class="form-control-file"
+              id="novoImagem"
+              aria-describedby="novoImagemHelp"
+              placeholder="Imagem da Marca"
+              required
+              @change="carregarImagem($event)"
+            />
+          </input-container-component>
+        </div>
+      </template>
+      <template v-slot:rodape>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Fechar
+        </button>
+        <button type="button" class="btn btn-primary" @click="salvar()">
+          Salvar
+        </button>
+      </template>
+    </modal-component>
     <!--Fim-->
   </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      urlBase: "http://localhost:8000/api/v1/marca",
+      nomeMarca: "",
+      arquivoImagem: [],
+    };
+  },
+  computed: {
+    token() {
+      let token = document.cookie.split(";").find(indices => {
+        return indices.includes("token=");
+      }).replace("token=", "Bearer ");
+      return token;
+    },
+  },
+  methods: {
+    carregarImagem(e) {
+      this.arquivoImagem = e.target.files;
+    },
+    salvar() {
+      console.log(this.nomeMarca, this.arquivoImagem[0]);
+
+      let formData = new FormData();
+
+      formData.append("nome", this.nomeMarca);
+      formData.append("imagem", this.arquivoImagem[0]);
+
+      let config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Accept: "application/json",
+          Authorization: this.token,
+        },
+      };
+
+      axios
+        .post(this.urlBase, formData, config)
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((errors) => {
+          console.log(errors);
+        });
+    },
+  },
+};
+</script>

@@ -71,8 +71,18 @@
     <!--Modal-->
     <modal-component id="modalMarca" titulo="Adicionar Marca">
       <template v-slot:alertas>
-        <alert-component tipo="success" :detalhes="transacaoDetalhes" titulo="Sucesso no Cadastro" v-if="transacaoStatus == 'adicionado'"></alert-component>
-        <alert-component tipo="danger" :detalhes="transacaoDetalhes" titulo="Erro no Cadastro" v-if="transacaoStatus == 'erro'"></alert-component>
+        <alert-component
+          tipo="success"
+          :detalhes="transacaoDetalhes"
+          titulo="Sucesso no Cadastro"
+          v-if="transacaoStatus == 'adicionado'"
+        ></alert-component>
+        <alert-component
+          tipo="danger"
+          :detalhes="transacaoDetalhes"
+          titulo="Erro no Cadastro"
+          v-if="transacaoStatus == 'erro'"
+        ></alert-component>
       </template>
       <template v-slot:conteudo>
         <div class="form-group">
@@ -132,22 +142,46 @@ export default {
       urlBase: "http://localhost:8000/api/v1/marca",
       nomeMarca: "",
       arquivoImagem: [],
-      transacaoStatus: '',
-      transacaoDetalhes: []
+      transacaoStatus: "",
+      transacaoDetalhes: {},
+      marcas: []
     };
   },
   computed: {
     token() {
-      let token = document.cookie.split(";").find(indices => {
-        return indices.includes("token=");
-      }).replace("token=", "Bearer ");
+      let token = document.cookie
+        .split(";")
+        .find((indices) => {
+          return indices.includes("token=");
+        })
+        .replace("token=", "Bearer ");
       return token;
     },
   },
   methods: {
+    carregarLista() {
+      let config = {
+        headers: {
+          Accept: "application/json",
+          Authorization: this.token,
+        },
+      };
+
+      axios
+        .get(this.urlBase, config)
+        .then((response) => {
+          this.marcas = response.data
+          console.log(this.marcas);
+        })
+        .catch((errors) => {
+          console.log(errors);
+        });
+    },
+
     carregarImagem(e) {
       this.arquivoImagem = e.target.files;
     },
+
     salvar() {
       console.log(this.nomeMarca, this.arquivoImagem[0]);
 
@@ -167,15 +201,23 @@ export default {
       axios
         .post(this.urlBase, formData, config)
         .then((response) => {
-          this.transacaoStatus = 'adicionado';
-          this.transacaoDetalhes = response;
+          this.transacaoStatus = "adicionado";
+          this.transacaoDetalhes = {
+            mensagem: "ID do registro " + response.data.id,
+          };
           console.log(response);
         })
         .catch((errors) => {
-          this.transacaoStatus = 'erro';
-          this.transacaoDetalhes = errors.response;
+          this.transacaoStatus = "erro";
+          this.transacaoDetalhes = {
+            mensagem: errors.response.data.message,
+            dados: errors.response.data.errors,
+          };
         });
     },
   },
+  mounted(){
+    this.carregarLista();
+  }
 };
 </script>

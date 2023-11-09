@@ -51,7 +51,12 @@
 
         <card-component titulo="Relação de marcas">
           <template v-slot:conteudo>
-            <table-component :dados="marcas" :titulos="['id', 'nome', 'imagem']"></table-component>
+            <table-component :dados="marcas.data" :titulos="{
+              id: {titulo: 'ID', tipo: 'text'},
+              created_at: {titulo: 'Criado em', tipo: 'data'},
+              nome: {titulo: 'Nome', tipo: 'text'},
+              imagem: {titulo: 'Imagem', tipo: 'imagem'}
+            }"></table-component>
           </template>
           <template v-slot:rodape>
             <button

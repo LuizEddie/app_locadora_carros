@@ -19,6 +19,7 @@
                     id="inputId"
                     aria-describedby="idHelp"
                     placeholder="ID"
+                    v-model="busca.id"
                   />
                 </input-container-component>
               </div>
@@ -30,18 +31,23 @@
                   texto-ajuda="Opcional. Informe o nome da marca"
                 >
                   <input
-                    type="number"
+                    type="text"
                     class="form-control"
                     id="inputNome"
                     aria-describedby="nomeHelp"
-                    placeholder="Informe o nome da marca"
+                    placeholder="Opcional. Informe o nome da marca"
+                    v-model="busca.nome"
                   />
                 </input-container-component>
               </div>
             </div>
           </template>
           <template v-slot:rodape>
-            <button type="submit" class="btn btn-primary btn-sm float-right">
+            <button
+              type="submit"
+              class="btn btn-primary btn-sm float-right"
+              @click="pesquisar()"
+            >
               Pesquisar
             </button>
           </template>
@@ -65,7 +71,12 @@
             <div class="row">
               <div class="col-10">
                 <paginate-component>
-                  <li v-for="l, key in marcas.links" :key="key" :class="l.active ? 'page-item active' : 'page-item'" @click="paginacao(l)">
+                  <li
+                    v-for="(l, key) in marcas.links"
+                    :key="key"
+                    :class="l.active ? 'page-item active' : 'page-item'"
+                    @click="paginacao(l)"
+                  >
                     <a class="page-link" v-html="l.label"></a>
                   </li>
                 </paginate-component>
@@ -159,11 +170,17 @@ export default {
   data() {
     return {
       urlBase: "http://localhost:8000/api/v1/marca",
+      urlPaginacao: '',
+      urlFiltro: '',
       nomeMarca: "",
       arquivoImagem: [],
       transacaoStatus: "",
       transacaoDetalhes: {},
       marcas: { data: [] },
+      busca: {
+        id: "",
+        nome: "",
+      },
     };
   },
   computed: {
@@ -178,14 +195,36 @@ export default {
     },
   },
   methods: {
-    paginacao(l){ 
-      if(l.url){
-        this.urlBase = l.url
-        this.carregarLista()
+    pesquisar() {
+      let filtro = "";
+
+      for (let chave in this.busca) {
+        if (this.busca[chave]) {
+          if (filtro != "") {
+            filtro += ";";
+          }
+          filtro += chave + ":like:" + this.busca[chave];
+        }
+      }
+
+      if(filtro != ''){
+        this.urlFiltro = '&filtro='+filtro;
+        this.urlPaginacao = 'page=1';
+      }else{
+        this.urlFiltro = '';
+      }
+      this.carregarLista();
+    },
+
+    paginacao(l) {
+      if (l.url) {
+        this.urlPaginacao = l.url.split("?")[1];
+        this.carregarLista();
       }
     },
-    
+
     carregarLista() {
+      let url = this.urlBase + '?' + this.urlPaginacao + this.urlFiltro;
       let config = {
         headers: {
           Accept: "application/json",
@@ -194,7 +233,7 @@ export default {
       };
 
       axios
-        .get(this.urlBase, config)
+        .get(url, config)
         .then((response) => {
           this.marcas = response.data;
           console.log(this.marcas);

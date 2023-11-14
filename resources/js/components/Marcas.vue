@@ -59,6 +59,9 @@
           <template v-slot:conteudo>
             <table-component
               :dados="marcas.data"
+              :visualizar="{visivel: true, dataToggle: 'modal', dataTarget: '#modalMarcaVisualizar'}"
+              :atualizar="true"
+              :remover="true"
               :titulos="{
                 id: { titulo: 'ID', tipo: 'text' },
                 created_at: { titulo: 'Criado em', tipo: 'data' },
@@ -162,6 +165,22 @@
       </template>
     </modal-component>
     <!--Fim-->
+
+    <!--Modal-->
+    <modal-component id="modalMarcaVisualizar" titulo="Visualizar Marca">
+      <template v-slot:alertas>
+       
+      </template>
+      <template v-slot:conteudo>
+        Teste
+      </template>
+      <template v-slot:rodape>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Fechar
+        </button>
+      </template>
+    </modal-component>
+    <!--Fim-->
   </div>
 </template>
 
@@ -170,8 +189,8 @@ export default {
   data() {
     return {
       urlBase: "http://localhost:8000/api/v1/marca",
-      urlPaginacao: '',
-      urlFiltro: '',
+      urlPaginacao: "",
+      urlFiltro: "",
       nomeMarca: "",
       arquivoImagem: [],
       transacaoStatus: "",
@@ -207,11 +226,11 @@ export default {
         }
       }
 
-      if(filtro != ''){
-        this.urlFiltro = '&filtro='+filtro;
-        this.urlPaginacao = 'page=1';
-      }else{
-        this.urlFiltro = '';
+      if (filtro != "") {
+        this.urlFiltro = "&filtro=" + filtro;
+        this.urlPaginacao = "page=1";
+      } else {
+        this.urlFiltro = "";
       }
       this.carregarLista();
     },
@@ -224,7 +243,7 @@ export default {
     },
 
     carregarLista() {
-      let url = this.urlBase + '?' + this.urlPaginacao + this.urlFiltro;
+      let url = this.urlBase + "?" + this.urlPaginacao + this.urlFiltro;
       let config = {
         headers: {
           Accept: "application/json",

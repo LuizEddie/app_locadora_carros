@@ -241,7 +241,7 @@
         </input-container-component>
       </template>
       <template v-slot:rodape>
-        <button type="button" class="btn btn-danger">Remover</button>
+        <button type="button" class="btn btn-danger" @click="remover()">Remover</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">
           Fechar
         </button>
@@ -281,6 +281,31 @@ export default {
     },
   },
   methods: {
+    remover(){
+      let confirmacao = confirm("Tem certeza que deseja remover este registro?")
+
+      if(!confirmacao){
+        return false;
+      }
+      let url = this.urlBase + '/' + this.$store.state.item.id;
+      
+      let formData = new FormData();
+      formData.append("_method", "delete");
+
+      let config = {
+          headers: {
+            'Accept' : 'application/json',
+            'Authorization' : this.token
+          }
+      }
+
+      axios.post(url, formData, config).then(response=>{
+        console.log('Registro removido com sucesso!', response);
+        this.carregarLista();
+      }).catch(error=>{
+        console.log("Houve um erro na tentativa de remoção do registro", error);
+      })
+    },
     pesquisar() {
       let filtro = "";
 

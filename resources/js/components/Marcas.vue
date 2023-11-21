@@ -64,11 +64,15 @@
                 dataToggle: 'modal',
                 dataTarget: '#modalMarcaVisualizar',
               }"
-              :atualizar="true"
+              :atualizar="{
+                visivel: true,
+                dataToggle: 'modal',
+                dataTarget: '#modalMarcaAtualizar',
+              }"
               :remover="{
                 visivel: true,
                 dataToggle: 'modal',
-                dataTarget: '#modalMarcaRemover'
+                dataTarget: '#modalMarcaRemover',
               }"
               :titulos="{
                 id: { titulo: 'ID', tipo: 'text' },
@@ -219,10 +223,26 @@
     </modal-component>
     <!--Fim-->
 
-        <!--Modal-->
+    <!--Modal-->
     <modal-component id="modalMarcaRemover" titulo="Remover Marca">
-      <template v-slot:alertas> </template>
-      <template v-slot:conteudo>
+      <template v-slot:alertas>
+        <alert-component
+          tipo="success"
+          titulo="Sucesso"
+          :detalhes="$store.state.transacao"
+          v-if="$store.state.transacao.status == 'sucesso'"
+        ></alert-component>
+        <alert-component
+          tipo="danger"
+          titulo="Erro"
+          :detalhes="$store.state.transacao"
+          v-if="$store.state.transacao.status == 'erro'"
+        ></alert-component>
+      </template>
+      <template
+        v-slot:conteudo
+        v-if="$store.state.transacao.status != 'sucesso'"
+      >
         <input-container-component titulo="ID">
           <input
             type="text"
@@ -241,9 +261,68 @@
         </input-container-component>
       </template>
       <template v-slot:rodape>
-        <button type="button" class="btn btn-danger" @click="remover()">Remover</button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          @click="remover()"
+          v-if="$store.state.transacao.status != 'sucesso'"
+        >
+          Remover
+        </button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">
           Fechar
+        </button>
+      </template>
+    </modal-component>
+    <!--Fim-->
+
+    <!--Modal-->
+    <modal-component id="modalMarcaAtualizar" titulo="Atualizar Marca">
+      <template v-slot:alertas> </template>
+      <template v-slot:conteudo>
+        <div class="form-group">
+          <input-container-component
+            titulo="Nome da Marca"
+            id="atualizarNome"
+            id-help="atualizarNomeHelp"
+            texto-ajuda="Digite o nome da marca"
+          >
+            <input
+              type="text"
+              class="form-control"
+              id="atualizarNome"
+              aria-describedby="atualizarNomeHelp"
+              placeholder="Nome da Marca"
+              required
+              v-model="$store.state.item.nome"
+            />
+          </input-container-component>
+        </div>
+        <div class="form-group">
+          <input-container-component
+            titulo="Imagem"
+            id="atualizarImagem"
+            id-help="atualizarImagemHelp"
+            texto-ajuda="Faça o upload do logo da marca"
+          >
+            <input
+              type="file"
+              class="form-control-file"
+              id="atualizarImagem"
+              aria-describedby="atualizarImagemHelp"
+              placeholder="Imagem da Marca"
+              required
+              @change="carregarImagem($event)"
+            />
+          </input-container-component>
+        </div>
+      </template>
+      <template v-slot:rodape>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Fechar
+        </button>
+        <button type="button" class="btn btn-primary" @click="atualizar()">
+          Atualizar
         </button>
       </template>
     </modal-component>
@@ -281,31 +360,39 @@ export default {
     },
   },
   methods: {
-    remover(){
-      let confirmacao = confirm("Tem certeza que deseja remover este registro?")
+    remover() {
+      let confirmacao = confirm(
+        "Tem certeza que deseja remover este registro?"
+      );
 
-      if(!confirmacao){
+      if (!confirmacao) {
         return false;
       }
-      let url = this.urlBase + '/' + this.$store.state.item.id;
-      
+      let url = this.urlBase + "/" + this.$store.state.item.id;
+
       let formData = new FormData();
       formData.append("_method", "delete");
 
       let config = {
-          headers: {
-            'Accept' : 'application/json',
-            'Authorization' : this.token
-          }
-      }
+        headers: {
+          Accept: "application/json",
+          Authorization: this.token,
+        },
+      };
 
-      axios.post(url, formData, config).then(response=>{
-        console.log('Registro removido com sucesso!', response);
-        this.carregarLista();
-      }).catch(error=>{
-        console.log("Houve um erro na tentativa de remoção do registro", error);
-      })
+      axios
+        .post(url, formData, config)
+        .then((response) => {
+          this.$store.state.transacao.status = "sucesso";
+          this.$store.state.transacao.mensagem = response.data.msg;
+          this.carregarLista();
+        })
+        .catch((error) => {
+          this.$store.state.transacao.status = "erro";
+          this.$store.state.transacao.mensagem = error.response.data.erro;
+        });
     },
+
     pesquisar() {
       let filtro = "";
 
@@ -347,7 +434,6 @@ export default {
         .get(url, config)
         .then((response) => {
           this.marcas = response.data;
-          console.log(this.marcas);
         })
         .catch((errors) => {
           console.log(errors);
@@ -359,8 +445,6 @@ export default {
     },
 
     salvar() {
-      console.log(this.nomeMarca, this.arquivoImagem[0]);
-
       let formData = new FormData();
 
       formData.append("nome", this.nomeMarca);
@@ -390,6 +474,33 @@ export default {
             dados: errors.response.data.errors,
           };
         });
+    },
+
+    atualizar() {
+      console.log(this.$store.state.item);
+      console.log(this.arquivoImagem);
+
+      let formData = new FormData();
+      formData.append("_method", "patch");
+      formData.append("nome", this.$store.state.item.nome);
+      formData.append("imagem", this.arquivoImagem[0]);
+
+      let config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Accept: "application/json",
+          Authorization: this.token,
+        },
+      };
+
+      let url = this.urlBase + "/" + this.$store.state.item.id;
+
+      axios.post(url, formData, config).then(response=>{
+        console.log("Atualizado", response);
+        this.carregarLista();
+      }).catch(errors=>{
+        console.log("Erro de atualização", errors.response)
+      })
     },
   },
   mounted() {

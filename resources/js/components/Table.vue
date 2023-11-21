@@ -6,7 +6,7 @@
           <th scope="col" v-for="(t, key) in titulos" :key="key">
             {{ t.titulo }}
           </th>
-          <th v-if="visualizar.visivel || atualizar || remover"></th>
+          <th v-if="visualizar.visivel || atualizar.visivel || remover.visivel"></th>
         </tr>
       </thead>
       <tbody>
@@ -20,7 +20,7 @@
           </td>
           <td>
             <button class="btn btn-outline-primary btn-sm" v-if="visualizar.visivel" :data-toggle="visualizar.dataToggle" :data-target="visualizar.dataTarget" @click="setStore(obj)">Visualizar</button>
-            <button class="btn btn-outline-success btn-sm" v-if="atualizar">Editar</button>
+            <button class="btn btn-outline-success btn-sm" v-if="atualizar.visivel" :data-toggle="atualizar.dataToggle" :data-target="atualizar.dataTarget" @click="setStore(obj)">Atualizar</button>
             <button class="btn btn-outline-danger btn-sm" v-if="remover.visivel" :data-toggle="remover.dataToggle" :data-target="remover.dataTarget" @click="setStore(obj)">Excluir</button>
           </td>
         </tr>
@@ -34,7 +34,8 @@ export default {
   methods: {
     setStore(obj){
       this.$store.state.item = obj;
-      console.log(obj);
+      this.$store.state.transacao.status = '';
+      this.$store.state.transacao.mensagem = '';
     }
   },
   computed: {

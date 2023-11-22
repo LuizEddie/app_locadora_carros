@@ -278,7 +278,20 @@
 
     <!--Modal-->
     <modal-component id="modalMarcaAtualizar" titulo="Atualizar Marca">
-      <template v-slot:alertas> </template>
+       <template v-slot:alertas>
+        <alert-component
+          tipo="success"
+          titulo="Sucesso"
+          :detalhes="$store.state.transacao"
+          v-if="$store.state.transacao.status == 'sucesso'"
+        ></alert-component>
+        <alert-component
+          tipo="danger"
+          titulo="Erro"
+          :detalhes="$store.state.transacao"
+          v-if="$store.state.transacao.status == 'erro'"
+        ></alert-component>
+      </template>
       <template v-slot:conteudo>
         <div class="form-group">
           <input-container-component
@@ -477,13 +490,13 @@ export default {
     },
 
     atualizar() {
-      console.log(this.$store.state.item);
-      console.log(this.arquivoImagem);
-
       let formData = new FormData();
       formData.append("_method", "patch");
       formData.append("nome", this.$store.state.item.nome);
-      formData.append("imagem", this.arquivoImagem[0]);
+
+      if(this.arquivoImagem[0]){
+        formData.append("imagem", this.arquivoImagem[0]);
+      }
 
       let config = {
         headers: {
@@ -496,10 +509,14 @@ export default {
       let url = this.urlBase + "/" + this.$store.state.item.id;
 
       axios.post(url, formData, config).then(response=>{
-        console.log("Atualizado", response);
+        this.$store.state.transacao.status = 'sucesso';
+        this.$store.state.transacao.mensagem = "Registro Atualizado com sucesso!";
+        atualizarImagem.value = "";
         this.carregarLista();
       }).catch(errors=>{
-        console.log("Erro de atualização", errors.response)
+        this.$store.state.transacao.status = 'erro';
+        this.$store.state.transacao.mensagem = errors.response.data.message;
+        this.$store.state.transacao.dados = errors.response.data.errors;
       })
     },
   },

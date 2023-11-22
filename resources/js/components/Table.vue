@@ -13,7 +13,7 @@
         <tr v-for="obj, chave in dadosFiltrados" :key="chave">
           <td v-for="dado, chave1 in obj" :key="chave1">
             <span v-if="titulos[chave1].tipo == 'text'">{{dado}}</span>
-            <span v-if="titulos[chave1].tipo == 'data'">{{'...'+dado}}</span>
+            <span v-if="titulos[chave1].tipo == 'data'">{{dado | formataDataHoraGlobal}}</span>
             <span v-if="titulos[chave1].tipo == 'imagem'">
               <img :src="'/storage/'+dado" width="30" height="30">
             </span>
@@ -30,12 +30,27 @@
 </template>
 <script>
 export default {
+  
+  filters:{
+    // formataDataHora(d){
+    //   if(!d){
+    //     return ''
+    //   }
+
+    //   d = d.split("T");
+    //   let data = d[0].split("-");
+    //   let hora = d[1].split(".")[0];
+      
+    //   return `${data[2]}/${data[1]}/${data[0]} ${hora}`;
+    // }
+  },
   props: ["dados", "titulos", 'visualizar', 'atualizar', 'remover'],
   methods: {
     setStore(obj){
       this.$store.state.item = obj;
       this.$store.state.transacao.status = '';
       this.$store.state.transacao.mensagem = '';
+      this.$store.state.transacao.dados= '';
     }
   },
   computed: {

@@ -361,17 +361,17 @@ export default {
       },
     };
   },
-  computed: {
-    token() {
-      let token = document.cookie
-        .split(";")
-        .find((indices) => {
-          return indices.includes("token=");
-        })
-        .replace("token=", "Bearer ");
-      return token;
-    },
-  },
+  // computed: {
+  //   token() {
+  //     let token = document.cookie
+  //       .split(";")
+  //       .find((indices) => {
+  //         return indices.includes("token=");
+  //       })
+  //       .replace("token=", "Bearer ");
+  //     return token;
+  //   },
+  // },
   methods: {
     remover() {
       let confirmacao = confirm(
@@ -386,15 +386,8 @@ export default {
       let formData = new FormData();
       formData.append("_method", "delete");
 
-      let config = {
-        headers: {
-          Accept: "application/json",
-          Authorization: this.token,
-        },
-      };
-
       axios
-        .post(url, formData, config)
+        .post(url, formData)
         .then((response) => {
           this.$store.state.transacao.status = "sucesso";
           this.$store.state.transacao.mensagem = response.data.msg;
@@ -436,15 +429,9 @@ export default {
 
     carregarLista() {
       let url = this.urlBase + "?" + this.urlPaginacao + this.urlFiltro;
-      let config = {
-        headers: {
-          Accept: "application/json",
-          Authorization: this.token,
-        },
-      };
 
       axios
-        .get(url, config)
+        .get(url)
         .then((response) => {
           this.marcas = response.data;
         })
@@ -466,8 +453,6 @@ export default {
       let config = {
         headers: {
           "Content-Type": "multipart/form-data",
-          Accept: "application/json",
-          Authorization: this.token,
         },
       };
 
@@ -501,8 +486,6 @@ export default {
       let config = {
         headers: {
           "Content-Type": "multipart/form-data",
-          Accept: "application/json",
-          Authorization: this.token,
         },
       };
 

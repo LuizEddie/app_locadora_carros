@@ -64,6 +64,13 @@ axios.interceptors.response.use(
     },
     error => {
         console.log('Erro na resposta ', error);
+        if(error.response.status == 401 && error.response.data.message == "Token has expired"){
+            axios.post('http://localhost:8000/api/refresh').then((response=>{
+                document.cookie = "token=" + response.data.token + ";SameSite=Lax";
+                window.location.reload();
+                console.log('refresh ', response.data.token);
+            }));
+        }
         return Promise.reject(error);
     }
 );
